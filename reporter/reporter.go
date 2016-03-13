@@ -1,4 +1,4 @@
-package ireporter
+package reporter
 
 import (
 	"encoding/json"
@@ -79,7 +79,7 @@ func (c Client) GetFinanceAccounts() ([]byte, error) {
 // GetSalesVendors return Sales.getVendors response
 func (c Client) GetSalesVendors(account int) ([]byte, error) {
 	if account <= 0 {
-		return nil, errors.New("Wrong vendor number")
+		return nil, errors.New("Wrong account number")
 	}
 	req := c.getBaseRequest()
 	req.QueryInput = fmt.Sprintf("%%5Bp%%3DReporter.properties%%2C+a%%3D%d%%2C+Sales.getVendors%%5D", account)
@@ -89,7 +89,7 @@ func (c Client) GetSalesVendors(account int) ([]byte, error) {
 // GetFinanceVendorsAndRegions return Finance.getVendors response
 func (c Client) GetFinanceVendorsAndRegions(account int) ([]byte, error) {
 	if account <= 0 {
-		return nil, errors.New("Wrong vendor number")
+		return nil, errors.New("Wrong account number")
 	}
 	req := c.getBaseRequest()
 	req.QueryInput = fmt.Sprintf("%%5Bp%%3DReporter.properties%%2C+a%%3D%d%%2C+Finance.getVendorsAndRegions%%5D", account)
@@ -161,17 +161,21 @@ func checkConfig(cfg Config) error {
 }
 
 func validateSalesReportArgs(account, vendor int, reportType, reportSubType, dateType, date string) error {
-	if vendor <= 0 {
-		return errors.New("Wrong vendor value")
-	}
 	if account <= 0 {
-		return errors.New("Wrong account value")
+		return errors.New("Wrong account number")
 	}
+	if vendor <= 0 {
+		return errors.New("Wrong vendor number")
+	}
+
+	if reportType != "Sales" && reportType != "Newsstand" {
+		return errors.New("Wrong ReportType, use: Sales or Newsstand")
+	}
+
 	switch reportSubType {
-	case "Summary",
-		"Detailed",
-		"Opt-In":
-		break
+	case "Summary":
+	case "Detailed":
+	case "Opt-In":
 	default:
 		return errors.New("Wrong ReportSubType, use: Summary, Detailed or Opt-In")
 	}
@@ -181,22 +185,18 @@ func validateSalesReportArgs(account, vendor int, reportType, reportSubType, dat
 		if len(date) != 8 {
 			return errors.New("Wrong DateType format for Daily Report, use: YYYYMMDD")
 		}
-		break
 	case "Weekly":
 		if len(date) != 8 {
 			return errors.New("Wrong DateType format for Weekly Report, use: YYYYMMDD")
 		}
-		break
 	case "Monthly":
 		if len(date) != 6 {
 			return errors.New("Wrong DateType format for Monthly Report, use: YYYYMM")
 		}
-		break
 	case "Yearly":
 		if len(date) != 4 {
 			return errors.New("Wrong DateType format for Yearly Report, use: YYYY")
 		}
-		break
 	default:
 		return errors.New("Wrong DateType, use: Daily, Weekly, Monthly or Yearly")
 	}
