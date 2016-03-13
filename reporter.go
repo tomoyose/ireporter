@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -119,7 +118,7 @@ func (c Client) send(endpoint string, r Request) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Print(string(q))
+
 	query := fmt.Sprintf("jsonRequest=%s", string(q))
 	resp, err := http.Post(endpoint, "application/x-www-form-urlencoded", strings.NewReader(query))
 	if err != nil {
