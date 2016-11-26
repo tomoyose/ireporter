@@ -58,8 +58,8 @@ Robot mode is intended for an automated script that’s used regularly. Messages
 			fileName := fmt.Sprintf("SalesReport_%s.gz", *date)
 			ioutil.WriteFile(fileName, res, 0644)
 			fmt.Printf("Report saved to %s", fileName)
-        default:
-            fmt.Print(`Sales commands include:
+		default:
+			fmt.Print(`Sales commands include:
 	 getHelp: Returns this help message. No arguments.
 	 getStatus: Returns status of Sales and Trends application. No arguments.
 	 getAccounts: Returns list of available accounts. No arguments.
@@ -81,8 +81,8 @@ For more details, see Reporter guide: http://help.apple.com/itc/appsreporterguid
 			res, err := cli.GetSalesVendors(*account)
 			handleError(err)
 			fmt.Print(string(res))
-        default:
-            fmt.Print(`Finance commands include:
+		default:
+			fmt.Print(`Finance commands include:
 	 getHelp: Returns this help message. No arguments.
 	 getStatus: Returns status of Financial reporting application. No arguments.
 	 getAccounts: Returns list of available accounts. No arguments.
@@ -93,7 +93,7 @@ For more details, see Reporter guide in the Resources and Help section on iTunes
 	} else {
 		flag.PrintDefaults()
 	}
-    fmt.Print("\n")
+	fmt.Print("\n")
 }
 
 func handleError(err error) {
