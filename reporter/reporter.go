@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 var version = 1.0
@@ -109,9 +110,16 @@ func (c Client) GetSalesReport(account, vendor int, reportType, reportSubType, d
 }
 
 // GetFinanceReport return Finance.getReport response (is report file or error)
-// func (c Client) GetFinanceReport() ([]byte, error) {
-// TODO implement me
-// }
+func (c Client) GetFinanceReport(account, vendor int, regionCode, reportType string, fiscalYear, fiscalPeriod int) ([]byte, error) {
+	err := validateFinancialReportArgs(account, vendor, regionCode, reportType, fiscalYear, fiscalPeriod)
+	if err != nil {
+		return nil, err
+	}
+	req := c.getBaseRequest()
+	qI := "%%5Bp%%3DReporter.properties%%2C+a%%3D%d%%2C+Finance.getReport%%2C+%d%%2C%s%%2C%s%%2C%d%%2C%d%%5D"
+	req.QueryInput = fmt.Sprintf(qI, account, vendor, regionCode, reportType, fiscalYear, fiscalPeriod)
+	return c.send(financeEndpoint, req)
+}
 
 func (c Client) send(endpoint string, r Request) ([]byte, error) {
 	q, err := json.Marshal(r)
@@ -201,5 +209,27 @@ func validateSalesReportArgs(account, vendor int, reportType, reportSubType, dat
 		return errors.New("Wrong DateType, use: Daily, Weekly, Monthly or Yearly")
 	}
 
+	return nil
+}
+
+func validateFinancialReportArgs(account, vendor int, regionCode, reportType string, fiscalYear, fiscalPeriod int) error {
+	if account <= 0 {
+		return errors.New("Wrong account number")
+	}
+	if vendor <= 0 {
+		return errors.New("Wrong vendor number")
+	}
+	if len(regionCode) != 2 {
+		return errors.New("Wrong region code")
+	}
+	if reportType != "Financial" {
+		return errors.New(`Worng report type: "Currently only one report type is available: Financial".`)
+	}
+	if fiscalYear > time.Now().Year() || fiscalYear <= 0 {
+		return errors.New("Wrong fiscal year")
+	}
+	if fiscalPeriod < 1 || fiscalPeriod > 12 {
+		return errors.New("Wrong fiscal period, it should be: 1-12")
+	}
 	return nil
 }

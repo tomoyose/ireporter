@@ -55,5 +55,5 @@ For more details, see Reporter guide: http://help.apple.com/itc/appsreporterguid
 
 # TODO
 
-* Finance.getReport
 * Fix build queryInput string
+* Add tests
