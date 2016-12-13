@@ -51,11 +51,11 @@ func NewClient(cfg Config) (*Client, error) {
 		httpCli: &http.Client{
 			Transport: &http.Transport{
 				Dial: (&net.Dialer{
-					Timeout:   15 * time.Second,
+					Timeout:   10 * time.Second,
 					KeepAlive: 180 * time.Second,
 				}).Dial,
 				TLSHandshakeTimeout:   10 * time.Second,
-				ResponseHeaderTimeout: 10 * time.Second,
+				ResponseHeaderTimeout: 300 * time.Second,
 				ExpectContinueTimeout: 1 * time.Second,
 				DisableCompression:    true,
 				DisableKeepAlives:     false,
