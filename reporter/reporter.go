@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,7 +18,8 @@ var financeEndpoint = "https://reportingitc-reporter.apple.com/reportservice/fin
 
 // Client is reporter client
 type Client struct {
-	cfg Config
+	cfg     Config
+	httpCli *http.Client
 }
 
 // Config base properties
@@ -46,6 +48,19 @@ func NewClient(cfg Config) (*Client, error) {
 	}
 	return &Client{
 		cfg: cfg,
+		httpCli: &http.Client{
+			Transport: &http.Transport{
+				Dial: (&net.Dialer{
+					Timeout:   15 * time.Second,
+					KeepAlive: 180 * time.Second,
+				}).Dial,
+				TLSHandshakeTimeout:   10 * time.Second,
+				ResponseHeaderTimeout: 10 * time.Second,
+				ExpectContinueTimeout: 1 * time.Second,
+				DisableCompression:    true,
+				DisableKeepAlives:     false,
+			},
+		},
 	}, nil
 }
 
@@ -128,17 +143,27 @@ func (c Client) send(endpoint string, r Request) ([]byte, error) {
 	}
 
 	query := fmt.Sprintf("jsonRequest=%s", string(q))
-	resp, err := http.Post(endpoint, "application/x-www-form-urlencoded", strings.NewReader(query))
+	req, err := http.NewRequest("POST", endpoint, strings.NewReader(query))
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Accept", "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2")
+	req.Header.Add("User-Agent", "Java/1.8.0_91")
+	req.Header.Add("Connection", "keep-alive")
+
+	res, err := c.httpCli.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode != http.StatusOK {
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
 		return nil, errors.New(string(body))
 	}
 	return body, nil
