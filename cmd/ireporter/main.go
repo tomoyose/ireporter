@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/chapsuk/ireporter/reporter"
+	"github.com/playneta/ireporter/reporter"
 )
 
 const (
