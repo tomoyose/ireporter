@@ -61,7 +61,6 @@ func NewClient(cfg Config) (*Client, error) {
 				}).Dial,
 				TLSHandshakeTimeout:   10 * time.Second,
 				ResponseHeaderTimeout: 300 * time.Second,
-				ExpectContinueTimeout: 1 * time.Second,
 				DisableCompression:    true,
 				DisableKeepAlives:     false,
 			},
