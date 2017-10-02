@@ -63,6 +63,7 @@ func NewClient(cfg Config) (*Client, error) {
 				ResponseHeaderTimeout: 300 * time.Second,
 				DisableCompression:    true,
 				DisableKeepAlives:     false,
+				Proxy:                 http.ProxyFromEnvironment,
 			},
 		},
 	}, nil
